@@ -1,0 +1,31 @@
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.cluster
+
+
+##
+N = 1000 
+A = np.zeros((N,2))
+eps = 1.e-2
+nb_centres = 4
+
+
+
+#generation de donnees : repartition gaussienne autour de 4 centres formant un carré
+L =[[-1,1],[1,1],[1,-1],[-1,-1]] # on utilise cette liste pour piocher un centre
+for k in range(N):
+    c = random.randint(0,3)         # on choisit le centre
+    x = random.gauss(L[c][0],0.3)
+    y = random.gauss(L[c][1],0.3)
+    A[k]=[x,y]
+    
+
+[centroides,distoriton] = scipy.cluster.vq.kmeans(A,nb_centres)
+
+plt.scatter(A[:,0],A[:,1], color = 'b')
+plt.scatter([centroides[0][0],centroides[1][0],centroides[2][0],centroides[3][0]],[centroides[0][1],centroides[1][1],centroides[2][1],centroides[3][1]],color = 'r')
+plt.show()
+
+for c in centroides :
+    print('(', c[0], ',', c[1], ')')
