@@ -40,5 +40,6 @@ def main():
 	(R,theta,data)=GenerationCarre(N,eps)
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
+	plt.show()
 	
-main()
+# main()
