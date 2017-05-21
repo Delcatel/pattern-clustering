@@ -1,6 +1,6 @@
 from cmath import *
-from math import floor
-from numpy import argmax, argmin, mean
+from math import floor, sqrt
+from numpy import argmax, argmin, mean, std
 import matplotlib.pyplot as plt
 
 
@@ -13,47 +13,67 @@ def rectToComplex(set):
 def ComplexToRect(set):
 	return [(z.real, z.imag) for z in set]
 
-
-def oba(set, nb4Sect=4, surfSect=2):
+	
+def oba(set, nb4Sect=32, surfSect=1, threshold=0.6827):
 	sectDeg = pi/(2*nb4Sect)
-	nbPerSect = [0 for i in range (4*nb4Sect)]
+	value = 0
+	surfSect-=1
 
-	for z in set:
-		nbPerSect[int(floor((pi-phase(z))/sectDeg))]+=1
+	while value < len(set)*threshold:
+		surfSect+=1
+		nbPerSect = [0 for i in range (4*nb4Sect)]
+		for z in set:
+			nbPerSect[int(floor((pi-phase(z))/sectDeg))]+=1
 
-	choice = argmax([sum([sum([nbPerSect[(i+nb4Sect*k+l)%(4*nb4Sect)] for l in range(surfSect)]) for k in range(4)]) for i in range(nb4Sect)])
+		indice = argmax([sum([sum([nbPerSect[(i+nb4Sect*k+l)%(4*nb4Sect)] for l in range(surfSect)]) for k in range(4)]) for i in range(nb4Sect)])
+		value = sum([sum([nbPerSect[(indice+nb4Sect*k+l)%(4*nb4Sect)] for l in range(surfSect)]) for k in range(4)])
 
-	phi = pi-(choice+surfSect/2)*pi/2/nb4Sect
-
-	refs = [exp(complex(0, phi+k*pi/2)) for k in range(4)]
-	for z in refs:
-		z0 = exp(complex(0, sectDeg*surfSect/2))
-		A = abs(z)
-		plt.plot([0, (z*z0/A).real], [0, (z*z0/A).imag], color="black", ls=":")
-		plt.plot([0, (z/z0/A).real], [0, (z/z0/A).imag], color="black", ls=":")
-
+	phi = pi-(indice+surfSect/2)*pi/2/nb4Sect
+	deviationAngle = sectDeg*surfSect/2
 	clusters = [[], [], [], []]
 	for z in set:
 		clusters[int(floor(2*(phase(z)-phi)/pi+0.5))%4].append(z)
 
 	centroides = [0, 0, 0, 0]
-	print("Centroides avant correction :")
 	for c in range(4):
-		centroides[c] = complex(mean([z.real for z in clusters[c]]), mean([z.imag for z in clusters[c]]))
-		print('R=',abs(centroides[c]),'theta=',phase(centroides[c])) 
+			centroides[c] = complex(mean([z.real for z in clusters[c]]), mean([z.imag for z in clusters[c]]))    
     
+	return clusters, centroides, phi, deviationAngle
+
+def oda (set, nb4Sect=64, surfSect=1, threshold=0.6827):
+	""" Algo not based on barycentres but standard deviation """
+	sectDeg = pi/(2*nb4Sect)
+	value = 0
+	surfSect-=1
+
+	while value < len(set)*threshold:
+		surfSect+=1
+		nbPerSect = [0 for i in range (4*nb4Sect)]
+		for z in set:
+			nbPerSect[int(floor((pi-phase(z))/sectDeg))]+=1
+
+		indice = argmax([sum([sum([nbPerSect[(i+nb4Sect*k+l)%(4*nb4Sect)] for l in range(surfSect)]) for k in range(4)]) for i in range(nb4Sect)])
+		value = sum([sum([nbPerSect[(indice+nb4Sect*k+l)%(4*nb4Sect)] for l in range(surfSect)]) for k in range(4)])
+
+	theta = pi-(indice+surfSect/2)*pi/2/nb4Sect
+	R = mean([abs(z) for z in set])
+	deviationAngle = sectDeg*surfSect/2
+
+	square = [rect(R, theta+pi/2*k) for k in range(4)]
     
-	return clusters, centroides
-	
+	return R/sqrt(2), (theta-pi/4)%(pi/2), square, deviationAngle
 
 def correction(centroides):
 	R = mean([abs(centroides[c]) for c in range(4)])
 	phis = [phase(centroides[c]) for c in range(4)]
 	m = argmin(phis)
-	theta = mean([phase(centroides[(m+k)%4])-pi/2*k for k in range(4)])
-	square = [R*exp(complex(0, theta+pi/2*k)) for k in range(4)]
+	angles = [phase(centroides[(m+k)%4])-pi/2*k for k in range(4)]
+	if angles[-1] < -2*pi:
+		angles[-1]+=2*pi
+	theta = mean(angles)
+	square = [rect(R, theta+pi/2*k) for k in range(4)]
 
-	return square
+	return R/sqrt(2), (theta-pi/4)%(pi/2), square
 
 def blackHole(set):
 	pass
