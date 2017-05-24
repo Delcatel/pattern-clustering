@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Thu May 18 12:26:26 2017
 
@@ -17,42 +16,55 @@ import math
 # Plus il est petit, plus les points sont proches des coins du carre.
 #R et theta sont renvoyes, on peut s'en servir pour evaluer l'efficacite de nos algorithmes
 def GenerationCarre(N,eps):
-	m1=complex(1,1)
-	m2=complex(-1,1)
-	m3=complex(-1,-1)
-	m4=complex(1,-1)
-	mk=[m1,m2,m3,m4]
-	R=random()
-	theta=np.pi*random()/2.
-	mi=np.array([complex(0,0) for i in range(N)])
+	m1 = complex(1,1)
+	m2 = complex(-1,1)
+	m3 = complex(-1,-1)
+	m4 = complex(1,-1)
+	mk = [m1,m2,m3,m4]
+	R = random()
+	theta = np.pi*random()/2.
+	H = R*np.exp(complex(0,theta))
+	mi = np.array([complex(0,0) for i in range(N)])
 	for i in range(N):
-		k=randint(0,3)
-		e=np.random.normal(0,eps,1)[0]
-		phi=2*np.pi*random()
-		mi[i]=e*np.exp(complex(0,phi))+mk[k]
+		gaussienne = np.random.normal(0,eps,1)[0]
+		phi = 2*np.pi*random()
+		mi[i] = H*(mk[randint(0,3)]+gaussienne*np.exp(complex(0,phi)))
 #on a eparpille au hasard des points autour des sommets du carre theorique et maintenant on effectue la transformation du canal.
-	mi=R*np.exp(complex(0,theta))*mi
+
 	return (R,theta,mi)
 	
 def Generation4bits(N,eps):
-	entiers=[-2,-1,1,-2]
+	entiers=[-3,-1,1,3]
 	mk=[[complex(i,j) for i in entiers] for j in entiers]
 	mk=mk[0]+mk[1]+mk[2]+mk[3]
 	R=random()
-	theta=np.pi*random()/2.
-	mi=np.array([complex(0,0) for i in range(N)])
+	theta = np.pi*random()/2.
+	H = R*np.exp(complex(0,theta))
+	mi = np.array([complex(0,0) for i in range(N)])
 	for i in range(N):
-		k=randint(0,15)
-		e=np.random.normal(0,eps,1)[0]
-		phi=2*np.pi*random()
-		mi[i]=e*np.exp(complex(0,phi))+mk[k]
-	mi=R*np.exp(complex(0,theta))*mi
+		gaussienne = np.random.normal(0,eps,1)[0]
+		phi = 2*np.pi*random()
+		mi[i] = H*(mk[randint(0,15)]+gaussienne*np.exp(complex(0,phi)))
 	return (R,theta,mi)
 	
-def Affichage():
+def Affichage2bits():
 	N=500
 	eps=0.3
 	(R,theta,data)=GenerationCarre(N,eps)
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
 	
+def Affichage4bits():
+	N=500
+	eps=0.3
+	(R,theta,data)=Generation4bits(N,eps)
+	print('R=',R,'theta=',theta)
+	plt.scatter(np.real(data),np.imag(data))
+
+"""<<<<<<< HEAD
+	
+=======
+	plt.show()
+	
+# main()
+>>>>>>> a9ec32d2c5c25b996520f6cdf7d1a99ad1d08a56"""
