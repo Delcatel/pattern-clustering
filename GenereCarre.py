@@ -34,11 +34,25 @@ def GenerationCarre(N,eps):
 	mi=R*np.exp(complex(0,theta))*mi
 	return (R,theta,mi)
 	
-def main():
+def Generation4bits(N,eps):
+	entiers=[-2,-1,1,-2]
+	mk=[[complex(i,j) for i in entiers] for j in entiers]
+	mk=mk[0]+mk[1]+mk[2]+mk[3]
+	R=random()
+	theta=np.pi*random()/2.
+	mi=np.array([complex(0,0) for i in range(N)])
+	for i in range(N):
+		k=randint(0,15)
+		e=np.random.normal(0,eps,1)[0]
+		phi=2*np.pi*random()
+		mi[i]=e*np.exp(complex(0,phi))+mk[k]
+	mi=R*np.exp(complex(0,theta))*mi
+	return (R,theta,mi)
+	
+def Affichage():
 	N=500
 	eps=0.3
 	(R,theta,data)=GenerationCarre(N,eps)
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
 	
-main()
