@@ -10,9 +10,9 @@ from GenereCarre import GenerationCarre
 def square_kmeans(x1=0, x2=1, y1=0, y2=1, num=100, loi=uniform, k=4):
 	return vq.kmeans(square_data(x1=0, x2=1, y1=0, y2=1, num=100, loi=uniform), k)
 
-def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto"):
+def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
-	clusters, centroides, phi, deviationAngle = oba(set, precision, 1, 0.6748)
+	clusters, centroides, phi, deviationAngle = oba(set, precision, 1, clusteringThreshold)
 	R2, theta2, square = correction(centroides)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
@@ -42,12 +42,12 @@ def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto"):
 
 	return error
 
-def histogramOba(nbTests, dispIntervals):
+def histogramOba(nbTests, dispIntervals, clusteringThreshold=0.1):
 	Data = []
 	for i in range(1, nbTests+1):
 		if(i%dispIntervals==0):
 			print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
-		Data.append(obaTest(500, 0.5, 128, "auto", False))
+		Data.append(obaTest(500, 0.5, 128, "auto", False, clusteringThreshold))
 
 	eff, val, patches = plt.hist(Data, range = (0, 5), bins = 25, edgecolor = 'black', normed=True)
 	plt.xlabel("Erreur sur H (en %)")
@@ -65,12 +65,12 @@ def histogramOba(nbTests, dispIntervals):
 	plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, l), color="red")
 	plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=(mu+sigma, l*3/4), xytext=(mu+sigma+0.2, l*3/4), color="green")
 
-	plt.savefig("histogramOba"+str(nbTests)+".png")
+	plt.savefig("images/histogramOba"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto"):
+def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto", clusteringThreshold=0.1):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
-	R2, theta2, square, deviationAngle = oda(set, precision, 1, 0.6748)
+	R2, theta2, square, deviationAngle = oda(set, precision, 1, clusteringThreshold)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
 	if verbose==True or (verbose=="auto" and error >= 10):
@@ -93,12 +93,12 @@ def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto"):
 
 	return error
 
-def histogramOda(nbTests, dispIntervals):
+def histogramOda(nbTests, dispIntervals, clusteringThreshold=0.1):
 	Data = []
 	for i in range(1, nbTests+1):
 		if(i%dispIntervals==0):
 			print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
-		Data.append(odaTest(500, 0.5, 128, "auto", False))
+		Data.append(odaTest(500, 0.5, 128, "auto", False, clusteringThreshold))
 
 	eff, val, patches = plt.hist(Data, range = (0, 10), bins = 50, edgecolor = 'black', normed=True)
 	plt.xlabel("Erreur sur H (en %)")
@@ -116,8 +116,13 @@ def histogramOda(nbTests, dispIntervals):
 	plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, l), color="red")
 	plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=(mu+sigma, l*3/4), xytext=(mu+sigma+0.2, l*3/4), color="green")
 
-	plt.savefig("histogramOda"+str(nbTests)+".png")
+	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-obaTest(500, 0.5, 128, True, True)
-# histogramOda(1000, 50)
+def bhaTest(nbPoints, eps):
+	(R, theta, set) = GenerationCarre(nbPoints,eps)
+	centroides = bha(set, 4)
+	graphics(centroides, "blue")
+# obaTest(500, 0.5, 128, True, True)
+histogramOda(1000, 50)
+# bhaTest(500, 0.5)

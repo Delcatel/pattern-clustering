@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from cmath import *
 from math import floor, sqrt
-from numpy import argmax, argmin, mean, std
+from numpy import argmax, argmin, mean, std, zeros
 import matplotlib.pyplot as plt
+from operator import itemgetter
 
 
 def graphics(set, color='black', linewidth=3, marker='o'):
@@ -75,5 +78,47 @@ def correction(centroides):
 
 	return R/sqrt(2), (theta-pi/4)%(pi/2), square
 
-def blackHole(set):
-	pass
+class point():
+	def __init__(self, z, num):
+		self.z = z
+		self.index = num
+		self.weight = 1
+
+def fusion(points, i, j):
+	for index0, pt in enumerate(points):
+		if pt.index == i:
+			i0 = index0
+		if pt.index == j:
+			j0 = index0
+			del(points[index0])
+			break
+
+	points[i0].z = (points[i0].weight*points[i0].z+points[j0].weight*points[j0].z)/(points[i0].weight+points[j0].weight)
+	points[i0].weight = points[i0].weight+points[j0].weight
+
+	return i0
+
+def bha(set, nbClusters):
+	""" Black Hole Algorithm """
+	nbPoints = len(set)
+	points = [point(z, num) for num, z in enumerate(set)]
+
+	distMat = zeros((nbPoints, nbPoints))
+	for row in range(nbPoints):
+		for col in range(row+1, nbPoints):
+			distMat[row, col] = abs(points[row].z-points[col].z)
+
+	sortedPoints = sorted([(i, j, distMat[i, j]) for i in range(nbPoints) for j in range(i+1, nbPoints)], key=itemgetter(2)) 
+	# i < j est un invariant utilisé dans fusion !
+
+	for k in range(nbPoints-nbClusters):
+		i, j = sortedPoints[0][0:2]
+		i0 = fusion(points, i, j)
+		sortedPoints = [x for x in sortedPoints if x[0]!=j and x[1]!=j and x[0]!=i and x[1]!=j]
+		for pt in [pt for pt in points if pt.index != i]:
+			dist = abs(points[i0].z-pt.z)
+			distMat[min(i, pt.index), max(i, pt.index)] = dist
+			sortedPoints.append((min(i, pt.index), max(i, pt.index), dist))
+		sortedPoints = sorted([(i, j, distMat[i, j]) for i in range(nbPoints) for j in range(nbPoints)], key=itemgetter(2))
+
+	return [pt.z for z in points]
