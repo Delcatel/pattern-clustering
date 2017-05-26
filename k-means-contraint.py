@@ -3,7 +3,6 @@
 Created on Wed May 17 23:33:51 2017
 
 """
-from random import *
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -61,21 +60,21 @@ def ecart_centroides(centroides_new,centroides_old):
         ecart += (centroides_new[k][0]-centroides_old[k][0])**2 + (centroides_new[k][1]-centroides_old[k][1])**2
     return ecart
 
-#un k-means modifie pour initialiser aleatoirement
-def K_means(data,epsilon):
-    n0=4
+#un k-means avec initialisation aleatoire
+def K_means(nbclusters,data,epsilon):
     # choix des centroides initiaux aleatoire
-    init=[randint(0,len(data)-1) for i in range(4)]
-    centroides_old = np.zeros((n0,2))
-    centroides = np.zeros((n0,2))
-    for i in range(n0):
-        centroides[i] = data[init [i]] # on prend des points aleatoires des donnees
-    clusters = [[[0,0]]]*n0
-    barycentres = [[0,0]]*n0              
+    init=[randint(0,len(data)-1) for i in range(nbclusters)]
+    centroides_old = np.zeros((nbclusters,2))
+    centroides = np.zeros((nbclusters,2))
+    for i in range(nbclusters):
+        centroides[i] = np.copy(data[init[i]]) # on prend des points aleatoires des donnees
+    clusters = clusterization(data,centroides)
+    barycentres = [[0,0]]*nbclusters       
     compteur=0
+    
     while (compteur<100 and ecart_centroides(centroides,centroides_old) >= epsilon):   
         compteur+=1
-        for i in range(n0):
+        for i in range(nbclusters):
             if len(clusters[i])==0:
                 barycentres[i]=np.copy(centroides[i])
             else:
@@ -89,9 +88,52 @@ def K_means(data,epsilon):
 #####################################MES FONCTIONS############################################################################
 ##############################################################################################################################
 			
-def K_means_diag_carre(data,epsilon):
+def K_means_diag_carre_2bits(data,epsilon):
     init=[randint(0,len(data)-1) for i in range(4)]
     n0=4
+    centroides_old = np.zeros((n0,2))
+    centroides = np.zeros((n0,2))
+    for i in range(n0):
+        centroides[i] = data[init[i]]
+    barycentres = [[0,0]]*n0              
+    clusters = clusterization(data,centroides)
+    compteur=0
+    while (compteur<100 and ecart_centroides(centroides,centroides_old) > epsilon):
+        compteur+=1
+        for i in range(n0):
+            if len(clusters[i])==0:
+                barycentres[i]=np.copy(centroides[i])
+            else:
+                barycentres[i] = np.copy(barycentre_cluster(clusters[i]))
+        centroides_old = np.copy(centroides)
+        (dmax,imax,jmax)=((barycentres[0][0]-barycentres[1][0])**2+(barycentres[0][1]-barycentres[1][1])**2,0,1)
+        for i in range(n0):
+            for j in range(n0):
+                a=(barycentres[i][0]-barycentres[j][0])**2+(barycentres[i][1]-barycentres[j][1])**2
+                if (a>dmax):
+                    dmax=a
+                    imax=i
+                    jmax=j
+        centroides[0]=np.copy(barycentres[imax])
+        centroides[2]=np.copy(barycentres[jmax])
+        a=complex(centroides[0][0],centroides[0][1])
+        b=complex(centroides[2][0],centroides[2][1])
+        omega=(a+b)/2.
+        c=omega+complex(0,1)*(b-omega)
+        d=omega+complex(0,1)*(a-omega)
+        centroides[1][0]=d.real
+        centroides[1][1]=d.imag
+        centroides[3][0]=c.real
+        centroides[3][1]=c.imag
+        clusters = clusterization(data,centroides)
+    #print(compteur)
+    return [clusters,centroides]
+				
+#initialisation aleatoire
+"""def K_means_diag_carre_4bits(data,epsilon):
+    n0=16
+    init=[randint(0,len(data)-1) for i in range(n0)]
+    
     centroides_old = np.zeros((n0,2))
     centroides = np.zeros((n0,2))
     for i in range(n0):
@@ -99,7 +141,7 @@ def K_means_diag_carre(data,epsilon):
     barycentres = [[0,0]]*n0              
     clusters = clusterization(data,centroides)
     compteur=0
-    while (compteur<100 and ecart_centroides(centroides,centroides_old) > epsilon):
+    while (compteur<10000 and ecart_centroides(centroides,centroides_old) > epsilon):
         compteur+=1
         for i in range(n0):
             if len(clusters[i])==0:
@@ -118,84 +160,162 @@ def K_means_diag_carre(data,epsilon):
         centroides[0]=np.copy(barycentres[imax])
         centroides[2]=np.copy(barycentres[jmax])
         a=complex(centroides[0][0],centroides[0][1])
-        b=complex(centroides[2][0],centroides[2][1])
+        b=complex(centroides[1][0],centroides[1][1])
         omega=(a+b)/2.
         c=omega+complex(0,1)*(b-omega)
         d=omega+complex(0,1)*(a-omega)
-        centroides[1][0]=d.real
-        centroides[1][1]=d.imag
-        centroides[3][0]=c.real
-        centroides[3][1]=c.imag
+        #on redefinit tous les centroides a partir de a, b, c, d
+        p=0 #le premier centroide a definir est le numero 0
+        pointcourant=complex(0,0)
+        t=0.25
+        for c1 in [a,b,c,d]:
+            for c2 in [a,b,c,d]:
+                pointcourant=t*c1+(1-t)*c2
+                centroides[p][0]=pointcourant.real
+                centroides[p][1]=pointcourant.imag
+                p+=1
+        clusters = clusterization(data,centroides)
+    #print(compteur)
+    return [clusters,centroides]"""
+				
+#L'initialisation n'est pas aleatoire: on prend les deux points de data les plus eloignes entre eux et on les choisit en premier
+def K_means_diag_carre_4bits(data,epsilon):
+    n0=16
+    init=[randint(0,len(data)-1) for k in range (n0)]
+    (dmax,imax,jmax)=((data[0][0]-data[1][0])**2+(data[0][1]-data[1][1])**2,0,1)
+    for i in range(len(data)):
+        for j in range(len(data)):
+            a=(data[i][0]-data[j][0])**2+(data[i][1]-data[j][1])**2
+            if (a>dmax):
+                dmax=a
+                imax=i
+                jmax=j
+    init[0]=imax
+    init[1]=jmax
+    centroides_old = np.zeros((n0,2))
+    centroides = np.zeros((n0,2))
+    for i in range(n0):
+        centroides[i] = data[init [i]]
+    barycentres = [[0,0]]*n0              
+    clusters = clusterization(data,centroides)
+    compteur=0
+    while (compteur<100 and ecart_centroides(centroides,centroides_old) > epsilon):
+        compteur+=1
+        for i in range(n0):
+            if len(clusters[i])==0:
+                barycentres[i]=np.copy(centroides[i])
+            else:
+                barycentres[i] = np.copy(barycentre_cluster(clusters[i]))
+        centroides_old = np.copy(centroides)
+        (max,imax,jmax)=((barycentres[0][0]-barycentres[1][0])**2+(barycentres[0][1]-barycentres[1][1])**2,0,1)
+        for i in range(n0):
+            for j in range(n0):
+                a=(barycentres[i][0]-barycentres[j][0])**2+(barycentres[i][1]-barycentres[j][1])**2
+                if (a>max):
+                    max=a
+                    imax=i
+                    jmax=j
+        centroides[0]=np.copy(barycentres[imax])
+        centroides[1]=np.copy(barycentres[jmax])
+        a=complex(centroides[0][0],centroides[0][1])
+        b=complex(centroides[1][0],centroides[1][1])
+        omega=(a+b)/2.
+        c=omega+complex(0,1)*(b-omega)
+        d=omega+complex(0,1)*(a-omega)
+        #on redefinit tous les centroides a partir de a, b, c, d
+        p=0 #le premier centroide a definir est le numero 0
+        pointcourant=complex(0,0)
+        t=1./3.
+        for c1 in [a,b,c,d]:
+            for c2 in [a,b,c,d]:
+                pointcourant=t*c1+(1-t)*c2
+                centroides[p][0]=pointcourant.real
+                centroides[p][1]=pointcourant.imag
+                p+=1
         clusters = clusterization(data,centroides)
     #print(compteur)
     return [clusters,centroides]
 
-#renvoie la somme des distances de chaque point a  son centroide
-def ErreurK_means(N,eps):
-	(R,theta,mi)=GenerationCarre(N,eps)
-	data=[[x.real,x.imag] for x in mi]
-	[clusters,centroides] = K_means(data,0.00001)
-	s=0
-	for k in range(len(clusters)):
-		for x in clusters[k]:
-			s+= (x[0]-centroides[k][0])**2 + (x[1]-centroides[k][1])**2
-	return s
-	
-def ErreurK_means_diag_carre(N,eps):
-	(R,theta,mi)=GenerationCarre(N,eps)
-	data=[[x.real,x.imag] for x in mi]
-	[clusters,centroides] = K_means_diag_carre(data,0.00001)
-	s=0
-	for k in range(len(clusters)):
-		for x in clusters[k]:
-			s+= (x[0]-centroides[k][0])**2 + (x[1]-centroides[k][1])**2
-	return s
-
-def ComparaisonK_meansK_means_diag_carre(N,eps):
-	n=100
-	s1=0
-	s2=0
-	for i in range(n):
-		s1+=ErreurK_means(N,eps)
-		s2+=ErreurK_means_diag_carre(N,eps)
-	return('erreur k_means',s1*(1./n),'erreur k_means_diag_carre',s2*(1./n))
-
 #renvoie R et theta compris entre 0 et pi/2
 #data est sous forme de liste des coordonnees	
-def Resolution(data):
-	[clusters,centroides] = K_means(data,0.00001)
-	(max,imax,jmax)=((centroides[0][0]-centroides[1][0])**2+(centroides[0][1]-centroides[1][1])**2,0,1)
-	for i in range(4):
-		for j in range(4):
+def Resolution_K_means_diag_carre_2bits(data):
+	n0=4
+	[clusters,centroides] = K_means_diag_carre_2bits(data,0.00001)
+	(dmax,imax,jmax)=((centroides[0][0]-centroides[1][0])**2+(centroides[0][1]-centroides[1][1])**2,0,1)
+	for i in range(n0):
+		for j in range(n0):
 			a=(centroides[i][0]-centroides[j][0])**2+(centroides[i][1]-centroides[j][1])**2
-			if (a>max):
-				max=a
+			if (a>dmax):
+				dmax=a
 				imax=i
 				jmax=j
-	print(max)
-	R=np.sqrt(max/8.)
-	print(R)
-	p=0
-	while (p==imax or p==jmax):
-		p=p+1
+	R=np.sqrt(dmax/8.)
+	
 	a=complex(centroides[imax][0], centroides[imax][1])
-	b=complex(centroides[p][0], centroides[p][1])
+	b=complex(centroides[jmax][0], centroides[jmax][1])
 	theta = phase(a-b)
-	theta=theta%(np.pi/2.)
-	return(R,theta)
+	return(R,theta-0.25*np.pi)
+	
+def Resolution_K_means_diag_carre_4bits(data):
+	n0=16
+	[clusters,centroides] = K_means_diag_carre_4bits(data,0.00001)
+	(dmax,imax,jmax)=((centroides[0][0]-centroides[1][0])**2+(centroides[0][1]-centroides[1][1])**2,0,1)
+	for i in range(n0):
+		for j in range(n0):
+			a=(centroides[i][0]-centroides[j][0])**2+(centroides[i][1]-centroides[j][1])**2
+			if (a>dmax):
+				dmax=a
+				imax=i
+				jmax=j
+	R=np.sqrt(dmax/8.)
+	
+	a=complex(centroides[imax][0], centroides[imax][1])
+	b=complex(centroides[jmax][0], centroides[jmax][1])
+	theta = phase(a-b)
+	return(R,theta-0.25*np.pi)
+	
+def Resolution_K_means(n0,data):
+	[clusters,centroides] = K_means(n0,data,0.00001)
+	(dmax,imax,jmax)=((centroides[0][0]-centroides[1][0])**2+(centroides[0][1]-centroides[1][1])**2,0,1)
+	for i in range(n0):
+		for j in range(n0):
+			a=(centroides[i][0]-centroides[j][0])**2+(centroides[i][1]-centroides[j][1])**2
+			if (a>dmax):
+				dmax=a
+				imax=i
+				jmax=j
+	R=np.sqrt(dmax/8.)
+
+	a=complex(centroides[imax][0], centroides[imax][1])
+	b=complex(centroides[jmax][0], centroides[jmax][1])
+	theta = phase(a-b)
+	return(R,theta-0.25*np.pi)
 ###################################################################################################################################
 ###################################################################################################################################	
 
-#Pour visualiser le resultat de k_means ou de k_means_diag_carre en fonction de la ligne decommentee
-def test1():
+#Pour visualiser le resultat de k_means ou de k_means_diag_carre_2bits en fonction de la ligne decommentee
+def test1_2bits(eps):
 	N=500
-	eps=0.3
 	(R,theta,mi)=GenerationCarre(N,eps)
 	data=[[x.real,x.imag] for x in mi]
-	[clusters,centroides] = K_means(data,0.00001)
-	#[clusters,centroides] = K_means_diag_carre(data,0.0001)
+	#[clusters,centroides] = K_means_diag_carre_2bits(data,0.00001)
+	[clusters,centroides] = K_means(4,data,0.00001)
 	colors = ['b', 'c', 'y', 'm', 'r']
 	for k in range(4):
+		X=[x[0] for x in clusters[k]]
+		Y=[x[1] for x in clusters[k]]
+		plt.scatter(X,Y,color=colors[k])
+		plt.scatter(centroides[k][0],centroides[k][1],color='k')
+	plt.show()
+
+def test1_4bits(eps):
+	N=500
+	(R,theta,mi)=Generation4bits(N,eps)
+	data=[[x.real,x.imag] for x in mi]
+	[clusters,centroides] = K_means_diag_carre_4bits(data,0.00001)
+	#[clusters,centroides] = K_means(16,data,0.00001)
+	colors = [(random(),random(),random()) for k in range(16)]  # en RGB avec 3 nb entre 0 et 1
+	for k in range(16):
 		X=[x[0] for x in clusters[k]]
 		Y=[x[1] for x in clusters[k]]
 		plt.scatter(X,Y,color=colors[k])
@@ -205,8 +325,8 @@ def test1():
 #Permet de tester k_means ou k_means_diag_carre plusieurs fois sur les memes points et d'observer la dependance a l'initialisation,
 #qui est aleatoire pour les 2
 def test2(data):
-	#[clusters,centroides] = K_means(data,0.00001)
-	[clusters,centroides] = K_means_diag_carre(data,0.0001)
+	[clusters,centroides] = K_means(4,data,0.00001)
+	#[clusters,centroides] = K_means_diag_carre(data,0.0001)
 	colors = ['b', 'c', 'y', 'm', 'r']
 	for k in range(4):
 		X=[x[0] for x in clusters[k]]
@@ -215,28 +335,59 @@ def test2(data):
 		plt.scatter(centroides[k][0],centroides[k][1],color='k')
 	plt.show()
 	
-#compare le H approche au vrai H
-def test3():
+def norme(z):
+	return z.real**2+z.imag**2
+#compare le H approche au vrai H avec l'erreur relative en %
+def erreur_K_means(n0,eps):
 	N=500
-	eps=0.3
 	(R,theta,mi)=GenerationCarre(N,eps)
 	data=[[x.real,x.imag] for x in mi]
-	(Rapp,thetaapp)=Resolution(data)
-	print(Rapp,thetaapp)
+	(Rapp,thetaapp)=Resolution_K_means(n0,data)
 	H=R*np.exp(np.complex(0,theta))
 	Happ=Rapp*np.exp(np.complex(0,thetaapp))
-	plt.scatter(H.real,H.imag, color='r')
-	plt.scatter(Happ.real,Happ.imag)
-	plt.xlim(-1.,1.)
-	plt.ylim(-1.,1.)
-	plt.show()
+	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(n0)]))
+	
+def erreur_K_means_diag_carre_2bits(eps):
+	N=500
+	(R,theta,mi)=GenerationCarre(N,eps)
+	data=[[x.real,x.imag] for x in mi]
+	(Rapp,thetaapp)=Resolution_K_means_diag_carre_2bits(data)
+	H=R*np.exp(np.complex(0,theta))
+	Happ=Rapp*np.exp(np.complex(0,thetaapp))
+	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(4)]))
+	
+def erreur_K_means_diag_carre_4bits(eps):
+	N=500
+	(R,theta,mi)=GenerationCarre(N,eps)
+	data=[[x.real,x.imag] for x in mi]
+	(Rapp,thetaapp)=Resolution_K_means_diag_carre_4bits(data)
+	H=R*np.exp(np.complex(0,theta))
+	Happ=Rapp*np.exp(np.complex(0,thetaapp))
+	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(16)]))
 
 N=100
 eps=0.3
-print(ComparaisonK_meansK_means_diag_carre(N,eps))
 #(R,theta,mi)=GenerationCarre(N,eps)
 #data=[[x.real,x.imag] for x in mi]
 #test2(data)
-#test1()
-#test3()
+s=0
+a=0
+nbechec1=0
+nbechec2=0
+for i in range(N):
+	a=erreur_K_means(16,eps)
+	if (a>5):
+		print(a)
+		nbechec1+=1
+	s+=a
+print("erreur K_means en %",s*(1./N))
 
+s=0
+for i in range(N):
+	a=erreur_K_means_diag_carre_4bits(eps)
+	if (a>5):
+		print(a)
+		nbechec2+=1
+	s+=a
+print("erreur K_means_diag_carre en %",s*(1./N))
+print('nb echecs:', nbechec1,nbechec2)
