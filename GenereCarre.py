@@ -94,14 +94,6 @@ def Affichage4bits():
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
 
-"""<<<<<<< HEAD
-	
-=======
-	plt.show()
-	
-# main()
->>>>>>> a9ec32d2c5c25b996520f6cdf7d1a99ad1d08a56"""
-
 
 #Affichage2bits()
 #Affichage2bits2(500,6)

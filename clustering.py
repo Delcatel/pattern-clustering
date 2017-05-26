@@ -3,12 +3,8 @@
 from scipy.cluster import *
 from random import random
 # https://docs.scipy.org/doc/scipy/reference/cluster.html
-from generator import *
 from oba import *
 from GenereCarre import GenerationCarre
-
-def square_kmeans(x1=0, x2=1, y1=0, y2=1, num=100, loi=uniform, k=4):
-	return vq.kmeans(square_data(x1=0, x2=1, y1=0, y2=1, num=100, loi=uniform), k)
 
 def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
