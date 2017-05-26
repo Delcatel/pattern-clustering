@@ -42,33 +42,7 @@ def tests_intensifs(eps,nbtests,nbpoints,snr):
     
     
     
-def histogramOba(nbTests, dispIntervals):
-	Data = []
-	for i in range(1, nbTests+1):
-		if(i%dispIntervals==0):
-			print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
-		Data.append(obaTest(500, 0.5, 128, "auto", False))
 
-	eff, val, patches = plt.hist(Data, range = (0, 5), bins = 25, edgecolor = 'black', normed=True)
-	plt.xlabel("Erreur sur H (en %)")
-	plt.ylabel("Proportion d'occurrence sur "+str(nbTests)+" tests")
-	plt.title("Overlapping Barycentric Algorithm")
-
-	mu = mean(Data)
-	sigma = std(Data)
-	print("mu = "+str(mu))
-	print("std = "+str(sigma))
-	l = max(eff)
-	plt.plot([mu, mu], [0, l], color="red", ls="--")
-	plt.plot([mu-sigma, mu-sigma], [0, l*3/4], color="green", ls=":")
-	plt.plot([mu+sigma, mu+sigma], [0, l*3/4], color="green", ls=":")
-	plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, l), color="red")
-	plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=(mu+sigma, l*3/4), xytext=(mu+sigma+0.2, l*3/4), color="green")
-
-	plt.savefig("histogramOba"+str(nbTests)+".png")
-	plt.show()
-	
-	
 def histoviterbi(nbpoints,snr,nbTests,dispIntervals):
     Data = []
     for i in range(1, nbTests+1):
