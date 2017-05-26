@@ -93,7 +93,7 @@ def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto"):
 
 	return error
 
-def histogramOda(nbTests, dispIntervals):
+def histogramOda(nbTests, dispIntervals):	
 	Data = []
 	for i in range(1, nbTests+1):
 		if(i%dispIntervals==0):
