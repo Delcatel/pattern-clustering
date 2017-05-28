@@ -1,2 +1,8 @@
 # Python bytecode (application/x-python-bytecode)
 *.pyc
+*.aux
+*.synctex.gz
+*.toc
+*.dvi
+*.log
+*-eps-converted-to.pdf
