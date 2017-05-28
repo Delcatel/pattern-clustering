@@ -95,5 +95,5 @@ def Affichage4bits():
 	plt.scatter(np.real(data),np.imag(data))
 
 
-#Affichage2bits()
+Affichage2bits()
 #Affichage2bits2(500,6)
