@@ -45,7 +45,7 @@ def main():
 
 
 
-#histogram_erreur_relative(1000,1,viterbi_test,10000,10,"Viterbi",(0, 5))
+histogram_erreur_relative(1000,1,viterbi_test,10000,10,"Viterbi",(0, 5))
 #(l,taux_cata) = tests_intensifs(5,100,10000,5,viterbi_test)
 #print(l)
 #print(taux_cata)
