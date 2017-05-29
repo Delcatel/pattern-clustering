@@ -15,6 +15,7 @@ import math
 #Genere des points autour des coins d'un carre tire aleatoirement. eps est entre 0 et 1. 
 # Plus il est petit, plus les points sont proches des coins du carre.
 #R et theta sont renvoyes, on peut s'en servir pour evaluer l'efficacite de nos algorithmes
+#NE PLUS UTILISER CETTE GENERATION
 def GenerationCarre(N,eps):
 	m1 = complex(1,1)
 	m2 = complex(-1,1)
@@ -34,6 +35,7 @@ def GenerationCarre(N,eps):
 	return (R,theta,mi)
 
 #on a un pilotage de generation en snr et non plus en eps
+# UTILISER CELLE CI
 def GenerationCarre2(N,snr):
 	m1 = complex(1,1)
 	m2 = complex(-1,1)
@@ -56,7 +58,7 @@ def GenerationCarre2(N,snr):
 	
 		
 	
-	
+	#PAS CELLE LA
 def Generation4bits(N,eps):
 	entiers=[-3,-1,1,3]
 	mk=[[complex(i,j) for i in entiers] for j in entiers]
@@ -70,7 +72,9 @@ def Generation4bits(N,eps):
 		phi = 2*np.pi*random()
 		mi[i] = H*(mk[randint(0,15)]+gaussienne*np.exp(complex(0,phi)))
 	return (R,theta,mi)
-	
+
+
+#PAS CELLE LA	
 def Affichage2bits():
 	N=500
 	eps=0.3
@@ -78,7 +82,7 @@ def Affichage2bits():
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
 	
-	
+#MAIS CELLE CI	
 def Affichage2bits2(N,snr):
 	(R,theta,data)= GenerationCarre2(N,snr)
 	print('R=',R,'theta=',theta)
