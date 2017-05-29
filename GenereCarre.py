@@ -73,6 +73,21 @@ def Generation4bits(N,eps):
 		mi[i] = H*(mk[randint(0,15)]+gaussienne*np.exp(complex(0,phi)))
 	return (R,theta,mi)
 
+def Generation4bits2(N,SNR):
+	eps=0.3#la valeur n'a plus d'importance
+	bruit=np.array([np.random.normal(0,eps,1)[0]*np.exp(complex(0,2*np.pi*random())) for k in range(N)])
+	entiers=[-3,-1,1,3]
+	mk=[[complex(i,j) for i in entiers] for j in entiers]
+	mk=mk[0]+mk[1]+mk[2]+mk[3]
+	R = random()
+	theta = np.pi*random()/2.
+	H = R*np.exp(complex(0,theta))
+	signal=np.array([mk[randint(0,15)] for i in range(N)])
+	Ps=1./N*R**2*np.dot(np.conj(signal),signal.T)
+	Pb=1./N*np.dot(np.conj(bruit),bruit.T)
+	alpha=np.sqrt((Ps/Pb)/SNR)
+	data=H*signal+alpha*bruit
+	return (R,theta,data)
 
 #PAS CELLE LA	
 def Affichage2bits():
@@ -91,10 +106,9 @@ def Affichage2bits2(N,snr):
 	
 
 	
-def Affichage4bits():
+def Affichage4bits2(N,SNR):
 	N=500
-	eps=0.3
-	(R,theta,data)=Generation4bits(N,eps)
+	(R,theta,data)=Generation4bits2(N,SNR)
 	print('R=',R,'theta=',theta)
 	plt.scatter(np.real(data),np.imag(data))
 
