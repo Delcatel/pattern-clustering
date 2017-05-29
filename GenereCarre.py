@@ -49,8 +49,8 @@ def GenerationCarre2(N,snr):
 		mi[i] = mk[randint(0,3)]
 		bruit[i]= np.random.normal(0,1) + complex(0,1)*np.random.normal(0,1)
 	#ajustement du snr
-	Ps = np.absolute(H)**2*(mi.dot(mi)/N)
-	Pb = bruit.dot(bruit)/N
+	Ps = np.absolute(H)**2*(mi.dot(np.conj(mi))/N)
+	Pb = bruit.dot(np.conj(bruit))/N
 	alpha = np.sqrt(Ps/Pb/snr)
 	return (R,theta,H*mi+alpha*bruit)
 	
@@ -95,5 +95,5 @@ def Affichage4bits():
 	plt.scatter(np.real(data),np.imag(data))
 
 
-Affichage2bits()
-#Affichage2bits2(500,6)
+#Affichage2bits()
+#Affichage2bits2(500,10)
