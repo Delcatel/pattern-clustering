@@ -7,7 +7,7 @@ from viterbi import viterbi
 
 
 
-#la fct prend une liste de bits émise par l'émetteur (on suppose le nbre de bits paire
+#la fct prend une liste de bits émise par l'émetteur (on suppose le nbre de bits pair)
 def transmission(L_bits,snr,algo):
     N = int(len(L_bits)/2)
     #on convertit en complexes
