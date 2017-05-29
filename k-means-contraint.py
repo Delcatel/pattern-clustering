@@ -267,7 +267,7 @@ def Resolution_K_means_diag_carre_4bits(data):
 				dmax=a
 				imax=i
 				jmax=j
-	R=np.sqrt(dmax/8.)
+	R=np.sqrt(dmax/72.)
 	
 	a=complex(centroides[imax][0], centroides[imax][1])
 	b=complex(centroides[jmax][0], centroides[jmax][1])
@@ -294,9 +294,9 @@ def Resolution_K_means(n0,data):
 ###################################################################################################################################	
 
 #Pour visualiser le resultat de k_means ou de k_means_diag_carre_2bits en fonction de la ligne decommentee
-def test1_2bits(eps):
+def test1_2bits(SNR):
 	N=500
-	(R,theta,mi)=GenerationCarre(N,eps)
+	(R,theta,mi)=GenerationCarre2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	#[clusters,centroides] = K_means_diag_carre_2bits(data,0.00001)
 	[clusters,centroides] = K_means(4,data,0.00001)
@@ -308,9 +308,9 @@ def test1_2bits(eps):
 		plt.scatter(centroides[k][0],centroides[k][1],color='k')
 	plt.show()
 
-def test1_4bits(eps):
+def test1_4bits(SNR):
 	N=500
-	(R,theta,mi)=Generation4bits(N,eps)
+	(R,theta,mi)=Generation4bits2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	[clusters,centroides] = K_means_diag_carre_4bits(data,0.00001)
 	#[clusters,centroides] = K_means(16,data,0.00001)
@@ -338,44 +338,42 @@ def test2(data):
 def norme(z):
 	return z.real**2+z.imag**2
 #compare le H approche au vrai H avec l'erreur relative en %
-def erreur_K_means(n0,eps):
+def erreur_K_means(n0,SNR):
 	N=500
-	(R,theta,mi)=GenerationCarre(N,eps)
+	(R,theta,mi)=GenerationCarre2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	(Rapp,thetaapp)=Resolution_K_means(n0,data)
 	H=R*np.exp(np.complex(0,theta))
 	Happ=Rapp*np.exp(np.complex(0,thetaapp))
-	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(n0)]))
+	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(4)]))
 	
-def erreur_K_means_diag_carre_2bits(eps):
+def erreur_K_means_diag_carre_2bits(SNR):
 	N=500
-	(R,theta,mi)=GenerationCarre(N,eps)
+	(R,theta,mi)=GenerationCarre2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	(Rapp,thetaapp)=Resolution_K_means_diag_carre_2bits(data)
 	H=R*np.exp(np.complex(0,theta))
 	Happ=Rapp*np.exp(np.complex(0,thetaapp))
 	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(4)]))
 	
-def erreur_K_means_diag_carre_4bits(eps):
+def erreur_K_means_diag_carre_4bits(SNR):
 	N=500
-	(R,theta,mi)=GenerationCarre(N,eps)
+	(R,theta,mi)=Generation4bits2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	(Rapp,thetaapp)=Resolution_K_means_diag_carre_4bits(data)
 	H=R*np.exp(np.complex(0,theta))
 	Happ=Rapp*np.exp(np.complex(0,thetaapp))
-	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(16)]))
+	return (100*min([norme(Happ*np.exp(np.complex(0,k*np.pi*0.5))-H)/norme(H) for k in range(4)]))
 
-N=100
-eps=0.3
-#(R,theta,mi)=GenerationCarre(N,eps)
-#data=[[x.real,x.imag] for x in mi]
-#test2(data)
+"""
+N=200
+SNR=10
 s=0
 a=0
 nbechec1=0
 nbechec2=0
 for i in range(N):
-	a=erreur_K_means(16,eps)
+	a=erreur_K_means(4,SNR)
 	if (a>5):
 		print(a)
 		nbechec1+=1
@@ -384,10 +382,11 @@ print("erreur K_means en %",s*(1./N))
 
 s=0
 for i in range(N):
-	a=erreur_K_means_diag_carre_4bits(eps)
+	a=erreur_K_means_diag_carre_2bits(SNR)
 	if (a>5):
 		print(a)
 		nbechec2+=1
 	s+=a
 print("erreur K_means_diag_carre en %",s*(1./N))
 print('nb echecs:', nbechec1,nbechec2)
+"""
