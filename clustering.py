@@ -4,7 +4,15 @@ from scipy.cluster import *
 from random import random
 # https://docs.scipy.org/doc/scipy/reference/cluster.html
 from oba import *
-from GenereCarre import GenerationCarre
+from GenereCarre import GenerationCarre, Generation4bits
+
+def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):
+	if verbose==True or (verbose=="auto" and error >= 5):
+		print("Paramètres de génération :")
+		print('R = '+str(R)+'; theta = '+str(theta))
+		print("Paramètres estimés à la réception :")
+		print('R = '+str(R2)+'; theta = '+str(theta2))
+		print('Erreur sur H : '+str(round(error, 1))+' %\n')
 
 def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
@@ -12,13 +20,7 @@ def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto", cluster
 	R2, theta2, square = correction(centroides)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
-	if verbose==True or (verbose=="auto" and error >= 5):
-		print("Paramètres de génération :")
-		print('R = '+str(R)+'; theta = '+str(theta))
-		print("Paramètres estimés avant correction :")
-		print("Paramètres estimés à la réception :")
-		print('R = '+str(R2)+'; theta = '+str(theta2))
-		print('Erreur sur H : '+str(round(error, 1))+' %\n')
+	verbosity(verbose, error, 5, R, theta, R2, theta2)
 	
 	if display==True or (display=="auto" and error >= 5):
 		colors=["blue", "green", "purple", "orange"]
@@ -69,12 +71,7 @@ def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto", cluster
 	R2, theta2, square, deviationAngle = oda(set, precision, 1, clusteringThreshold)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
-	if verbose==True or (verbose=="auto" and error >= 10):
-		print("Paramètres de génération :")
-		print('R = '+str(R)+'; theta = '+str(theta))
-		print("Paramètres estimés à la réception :")
-		print('R = '+str(R2)+'; theta = '+str(theta2))
-		print('Erreur sur H : '+str(round(error, 1))+' %\n')
+	verbosity(verbose, error, 10, R, theta, R2, theta2)
 
 	if display==True or (display=="auto" and error >= 10):
 		graphics(set, "blue")
@@ -115,10 +112,48 @@ def histogramOda(nbTests, dispIntervals, clusteringThreshold=0.1):
 	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-def bhaTest(nbPoints, eps):
+def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
+	graphics(set, "blue")
+
 	centroides = bha(set, 4)
-	graphics(centroides, "blue")
+	R2, theta2, square = correction2bits(centroides)
+	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
+
+	verbosity(verbose, error, 10, R, theta, R2, theta2)
+
+	if display==True or (display=="auto" and error >= 10):
+		graphics(set, "blue")
+		graphics(centroides, "red")
+		graphics(square, "yellow", 0.5)
+		for i in range(4):
+			plt.plot([square[i].real, square[(i+1)%4].real], [square[i].imag, square[(i+1)%4].imag], color="yellow", ls="--")
+	plt.savefig("images/2bits_"+imageName)
+	plt.show()
+
+	return error
+
+def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName):
+	(R, theta, set) = Generation4bits(nbPoints,eps)
+	graphics(set, "blue")
+
+	centroides = bha(set, 16)
+	R2, theta2, square = correction4bits(centroides)
+	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
+
+	verbosity(verbose, error, 10, R, theta, R2, theta2)
+
+	if display==True or (display=="auto" and error >= 10):
+		graphics(set, "blue")
+		graphics(centroides, "red")
+		graphics(square, "yellow", 0.5)
+		for i in range(4):
+			plt.plot([square[i].real, square[(i+1)%4].real], [square[i].imag, square[(i+1)%4].imag], color="yellow", ls="--")
+	plt.savefig("images/4bits_"+imageName)
+	plt.show()
+
+	return error
+
 # obaTest(500, 0.5, 128, True, True)
-histogramOda(1000, 50)
-# bhaTest(500, 0.5)
+# histogramOda(1000, 50)
+bhaTest4bits(500, 0.5, True, True)
