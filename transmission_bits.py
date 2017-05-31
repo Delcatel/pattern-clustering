@@ -4,10 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from viterbi import viterbi
+from analyse import*
 
 
 
 #la fct prend une liste de bits émise par l'émetteur (on suppose le nbre de bits pair)
+#et renvoie l'erreur binaire sur la liste reçue en %
 def transmission(L_bits,snr,algo):
     N = int(len(L_bits)/2)
     #on convertit en complexes
@@ -38,7 +40,7 @@ def transmission(L_bits,snr,algo):
     alpha = np.sqrt(Ps/Pb/snr)
     data = H*data + alpha*bruit
     H_estime = algo(data,H)
-    print("erreur relative sur H en % = " + str(np.absolute((H-H_estime)/H)*100))
+    #print("erreur relative sur H en % = " + str(np.absolute((H-H_estime)/H)*100))
     data = data/H_estime
     L_bis = [0]*2*N
     # on reconvertit en binaire
@@ -59,30 +61,43 @@ def transmission(L_bits,snr,algo):
             else:
                 L_bis[2*i] = 0
                 L_bis[2*i+1] = 1
-    return L_bis
-    
-    
-#renvoie l'erreur relative sur les suites binaires en pourcents    
-def comparer_message(L,Lbis):
-    N = len(L)
+    N = len(L_bits)
     erreurs = 0
     for k in range(N):
-        if L[k]!=Lbis[k]:
+        if L_bits[k]!=L_bis[k]:
             erreurs+=1
     return erreurs/N*100
+    
+    
+
 
     
 
 #on genere la liste binaire
-"""N=1000
+"""N=10000
 snr = 5
 L = [0]*N
 for k in range(N):
     r = random()
     if r > 0.5:
         L[k]+=1
-Lbis = transmission(L,snr,viterbi)
+erreur = transmission(L,snr,viterbi)
+print("erreur binaire en % " + str(erreur))"""
+
+"""plt.subplot(3,1,1)
+histo_erreur_binaire(1000,50,viterbi,transmission,100,10,"Viterbi",(0, 5))
+plt.title("Viterbi algorithm")
+plt.axis([0,5,0,5])
+plt.subplot(3,1,2)
+histo_erreur_binaire(1000,50,viterbi,transmission,1000,10,"Viterbi",(0, 5))
+plt.axis([0,5,0,5])
+plt.ylabel("Densité d'occurrence sur 1000 tests")
+plt.subplot(3,1,3)
+histo_erreur_binaire(1000,50,viterbi,transmission,10000,10,"Viterbi",(0, 5))
+plt.xlabel("Erreur sur le train binaire (%)")
+plt.axis([0,5,0,5])
+
+plt.show()"""
 
 
-print(comparer_message(L,Lbis)) """
             

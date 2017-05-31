@@ -6,6 +6,7 @@ from random import random
 from GenereCarre import GenerationCarre2
 from analyse import*
 
+
 def viterbi(data,H):
     H_estime=0
     N= len(data)
@@ -33,19 +34,19 @@ def viterbi_test(nbpoints,snr):
 
         
 def main():
-    N=500
-    snr = 8
-    (R,theta,data) = GenerationCarre2(N,snr)
-    H = R*np.exp(complex(0,theta))
-    plt.scatter(np.real(data),np.imag(data))
-    plt.show()
-    H_estime = viterbi(data,H)
-    print(H)
-    print(H_estime)
+    N=10000
+    snr = 30
+    histogram_erreur_relative(1000,50,viterbi_test,N,snr,"Viterbi",(0, 5))
 
 
+"""plt.subplot(3,1,1)
+histogram_erreur_relative(1000,50,viterbi_test,1000,5,"Viterbi",(0, 5))
+plt.title("Viterbi algorithm")
+plt.subplot(3,1,2)
+histogram_erreur_relative(1000,50,viterbi_test,1000,10,"Viterbi",(0, 5))
+plt.ylabel("Densité d'occurrence sur 1000 tests")
+plt.subplot(3,1,3)
+histogram_erreur_relative(1000,50,viterbi_test,1000,30,"Viterbi",(0, 5))
+plt.xlabel("Erreur sur H (%)")
 
-#histogram_erreur_relative(1000,1,viterbi_test,10000,10,"Viterbi",(0, 5))
-#(l,taux_cata) = tests_intensifs(5,100,10000,5,viterbi_test)
-#print(l)
-#print(taux_cata)
+plt.show()"""
