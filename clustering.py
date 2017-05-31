@@ -4,9 +4,9 @@ from scipy.cluster import *
 from random import random
 # https://docs.scipy.org/doc/scipy/reference/cluster.html
 from oba import *
-from GenereCarre import GenerationCarre, Generation4bits
+from GenereCarre import GenerationCarre, GenerationCarre2, Generation4bits, Generation4bits2
 
-def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):
+def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):	# O(1)
 	if verbose==True or (verbose=="auto" and error >= 5):
 		print("Paramètres de génération :")
 		print('R = '+str(R)+'; theta = '+str(theta))
@@ -14,15 +14,15 @@ def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):
 		print('R = '+str(R2)+'; theta = '+str(theta2))
 		print('Erreur sur H : '+str(round(error, 1))+' %\n')
 
-def obaTest(nbPoints, eps, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):
-	(R, theta, set) = GenerationCarre(nbPoints,eps)
-	clusters, centroides, phi, deviationAngle = oba(set, precision, 1, clusteringThreshold)
-	R2, theta2, square = correction(centroides)
+def obaTest(nbPoints, snr, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):	# O(nbPoints)
+	(R, theta, set) = GenerationCarre2(nbPoints,snr)	# O(nbPoints)
+	clusters, centroides, phi, deviationAngle = oba(set, precision, 1, clusteringThreshold)	# O(nbPoints + precision^2)
+	R2, theta2, square = correction(centroides)	# O(1)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
-	verbosity(verbose, error, 5, R, theta, R2, theta2)
+	verbosity(verbose, error, 5, R, theta, R2, theta2)	# O(1)
 	
-	if display==True or (display=="auto" and error >= 5):
+	if display==True or (display=="auto" and error >= 5):	# O(nbPoints)
 		colors=["blue", "green", "purple", "orange"]
 		for i in range(4):
 			graphics(clusters[i], colors[i])
@@ -66,8 +66,8 @@ def histogramOba(nbTests, dispIntervals, clusteringThreshold=0.1):
 	plt.savefig("images/histogramOba"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-def odaTest(nbPoints, eps, precision=64, verbose="auto", display="auto", clusteringThreshold=0.1):
-	(R, theta, set) = GenerationCarre(nbPoints,eps)
+def odaTest(nbPoints, snr, precision=64, verbose="auto", display="auto", clusteringThreshold=0.1):
+	(R, theta, set) = GenerationCarre2(nbPoints, snr)
 	R2, theta2, square, deviationAngle = oda(set, precision, 1, clusteringThreshold)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
@@ -112,11 +112,11 @@ def histogramOda(nbTests, dispIntervals, clusteringThreshold=0.1):
 	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha"):
-	(R, theta, set) = GenerationCarre(nbPoints,eps)
+def bhaTest2bits(nbPoints, snr, verbose="auto", display="auto", imageName="bha"):	# O(nbPoints^3 ln(nbPoints))
+	(R, theta, set) = GenerationCarre2(nbPoints,snr)	# O(nbPoints)
 	graphics(set, "blue")
 
-	centroides = bha(set, 4)
+	centroides = bha(set, 4)	# O(nbPoints^3 ln(nbPoints))
 	R2, theta2, square = correction2bits(centroides)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
@@ -133,17 +133,16 @@ def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha")
 
 	return error
 
-def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha"):
-	(R, theta, set) = Generation4bits(nbPoints,eps)
-	graphics(set, "blue")
+def bhaTest4bits(nbPoints, snr, verbose="auto", display="auto", imageName="bha"):	# O(nbPoints^3 ln(nbPoints))
+	(R, theta, set) = Generation4bits2(nbPoints,snr)	# O(nbPoints)
 
-	centroides = bha(set, 16)
-	R2, theta2, square = correction4bits(centroides)
+	centroides = bha(set, 16)	# O(nbPoints^3 ln(nbPoints))
+	R2, theta2, square = correction4bits(centroides)	O(1)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
-	verbosity(verbose, error, 5, R, theta, R2, theta2)
+	verbosity(verbose, error, 5, R, theta, R2, theta2)	# O(1)
 
-	if display==True or (display=="auto" and error >= 5):
+	if display==True or (display=="auto" and error >= 5):	O(nbPoints)
 		graphics(set, "blue")
 		graphics(centroides, "red")
 		graphics(square, "yellow", 0.5)
@@ -155,12 +154,12 @@ def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha")
 
 	return error
 
-def histogramBha4bits(nbTests, dispIntervals, clusteringThreshold=0.1):
+def histogramBha4bits(nbTests, dispIntervals, nbPoints):
 	Data = []
 	for i in range(1, nbTests+1):
 		if(i%dispIntervals==0):
 			print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
-		Data.append(bhaTest4bits(100, 0.3, "auto", False, "bha"+str(i)))
+		Data.append(bhaTest4bits(nbPoints, 0.3, "auto", False, "bha"+str(i)))
 
 	eff, val, patches = plt.hist(Data, range = (0, 10), bins = 50, edgecolor = 'black', normed=True)
 	plt.xlabel("Erreur sur H (en %)")
@@ -178,9 +177,9 @@ def histogramBha4bits(nbTests, dispIntervals, clusteringThreshold=0.1):
 	plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, l), color="red")
 	plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=(mu+sigma, l*3/4), xytext=(mu+sigma+0.2, l*3/4), color="green")
 
-	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
+	plt.savefig("images/histogramBha"+str(nbTests)+"_"+str(nbPoints)+".png")
 	plt.show()
 
-# obaTest(500, 0.5, 128, True, True)
-#histogramBha4bits(20, 1)
-bhaTest4bits(500, 0.5, True, True, "bha0")
+# obaTest(500, 20, 128, True, True)
+histogramBha4bits(100, 5, 500)
+# bhaTest4bits(500, 20, True, True, "bha0")
