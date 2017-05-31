@@ -73,16 +73,7 @@ def transmission(L_bits,snr,algo):
 
     
 
-#on genere la liste binaire
-"""N=10000
-snr = 5
-L = [0]*N
-for k in range(N):
-    r = random()
-    if r > 0.5:
-        L[k]+=1
-erreur = transmission(L,snr,viterbi)
-print("erreur binaire en % " + str(erreur))"""
+
 
 """plt.subplot(3,1,1)
 histo_erreur_binaire(1000,50,viterbi,transmission,100,10,"Viterbi",(0, 5))
