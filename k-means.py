@@ -84,9 +84,9 @@ def K_means(data,n0,epsilon):
         #print(len(clusters[0]))
         # calcul des barycentres pour chaque cluster
         for i in range(n0):
-            barycentres[i] = barycentre_cluster(clusters[i])
-        centroides_old = centroides
-        centroides = barycentres
+            barycentres[i] = np.copy(barycentre_cluster(clusters[i]))
+        centroides_old = np.copy(centroides)
+        centroides = np.copy(barycentres)
     return [clusters,centroides]
 
 K0 = K_means(A,nb_centres,eps)[0][0]
