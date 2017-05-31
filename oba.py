@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from cmath import *
-from math import floor, sqrt
-from numpy import argmax, argmin, mean, std, zeros
+from math import floor, sqrt, atan
+from numpy import argmax, argmin, mean, std, zeros, array
 import matplotlib.pyplot as plt
 from operator import itemgetter
 
@@ -16,7 +16,7 @@ def rectToComplex(set):
 def ComplexToRect(set):
 	return [(z.real, z.imag) for z in set]
 
-	
+	sqrt(2)*sum([z1[1]-pi/2*k+3*pi/4 for z1 in Z1])
 def oba(set, nb4Sect=32, surfSect=1, threshold=0.6827):
 	sectDeg = pi/(2*nb4Sect)
 	value = 0
@@ -80,17 +80,26 @@ def correction2bits(centroides):
 
 def correction4bits(centroides):
 	points = sorted([polar(c) for c in centroides], key=itemgetter(0))
-	Rint = 
-	Rext = mean([pt[0] for pt in points[]])
-	phis = [phase(centroides[c]) for c in range(4)]
-	m = argmin(phis)
-	angles = [phase(centroides[(m+k)%4])-pi/2*k for k in range(4)]
-	if angles[-1] < -2*pi:
-		angles[-1]+=2*pi
-	theta = mean(angles)
-	square = [rect(R, theta+pi/2*k) for k in range(4)]
+	print(points)
+	R1 = mean([pt[0] for pt in points[0:4]])
+	R2 = mean([pt[0] for pt in points[4:12]])
+	R3 = mean([pt[0] for pt in points[12:16]])
+	R = (R1+2*R2+R3)/(sqrt(2)+2*sqrt(10)+3*sqrt(2))
+	z0 = max(points, key=itemgetter(0))
+	print(z0)
+	rotatedPoints = [(r, thet-z0[1]+pi/4) for r, thet in points]
+	Z1 = sorted(rotatedPoints[0:4], key=itemgetter(1))
+	Z2 = sorted(rotatedPoints[4:12], key=itemgetter(1))
+	Z3 = sorted(rotatedPoints[12:16], key=itemgetter(1))
+	deltaTheta = sqrt(2)*sum([z1[1]-pi/2*k+3*pi/4 for k, z1 in enumerate(Z1)])+sqrt(10)*sum([z2[1]-pi/2*k+pi-atan(1/3) for k, z2 in enumerate(Z2[0:2:])])+sqrt(10)*sum([z2[1]-pi/2*k+pi/2+atan(1/3) for k, z2 in enumerate(Z2[1:2:])])+3*sqrt(2)*sum([z3[1]-pi/2*k+3*pi/4 for k, z3 in enumerate(Z3)])
+	deltaTheta = deltaTheta/16
+	print(deltaTheta)
+	theta = z0[1]-pi/4+deltaTheta
+	print(theta)
 
-	return R/sqrt(2), (theta-pi/4)%(pi/2), square
+	square = rect(R, theta)*array([-3+3j, -1+3j, 1+3j, 3+3j, -3+1j, -1+1j, 1+1j, 3+1j, -3-1j, -1-1j, 1-1j, 3-1j, -3-3j, -1-3j, 1-3j, 3-3j])
+
+	return R, theta%(pi/2), square
 
 class point():
 	def __init__(self, z, num):

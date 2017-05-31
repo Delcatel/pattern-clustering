@@ -112,7 +112,7 @@ def histogramOda(nbTests, dispIntervals, clusteringThreshold=0.1):
 	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
 	plt.show()
 
-def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName):
+def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha"):
 	(R, theta, set) = GenerationCarre(nbPoints,eps)
 	graphics(set, "blue")
 
@@ -128,12 +128,12 @@ def bhaTest2bits(nbPoints, eps, verbose="auto", display="auto", imageName):
 		graphics(square, "yellow", 0.5)
 		for i in range(4):
 			plt.plot([square[i].real, square[(i+1)%4].real], [square[i].imag, square[(i+1)%4].imag], color="yellow", ls="--")
-	plt.savefig("images/2bits_"+imageName)
-	plt.show()
+		plt.savefig("images/2bits_"+imageName)
+		plt.show()
 
 	return error
 
-def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName):
+def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha"):
 	(R, theta, set) = Generation4bits(nbPoints,eps)
 	graphics(set, "blue")
 
@@ -148,12 +148,13 @@ def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName):
 		graphics(centroides, "red")
 		graphics(square, "yellow", 0.5)
 		for i in range(4):
-			plt.plot([square[i].real, square[(i+1)%4].real], [square[i].imag, square[(i+1)%4].imag], color="yellow", ls="--")
-	plt.savefig("images/4bits_"+imageName)
-	plt.show()
+			plt.plot([square[4*i].real, square[4*i+3].real], [square[4*i].imag, square[4*i+3].imag], color="yellow", ls="--")
+			plt.plot([square[i].real, square[i+12].real], [square[i].imag, square[i+12].imag], color="yellow", ls="--")
+		plt.savefig("images/4bits_"+imageName)
+		plt.show()
 
 	return error
 
 # obaTest(500, 0.5, 128, True, True)
 # histogramOda(1000, 50)
-bhaTest4bits(500, 0.5, True, True)
+bhaTest4bits(500, 0.3, True, True, "bha0")
