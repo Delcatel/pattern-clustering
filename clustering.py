@@ -180,6 +180,9 @@ def histogramBha4bits(nbTests, dispIntervals, nbPoints):
 	plt.savefig("images/histogramBha"+str(nbTests)+"_"+str(nbPoints)+".png")
 	plt.show()
 
+def Test(nbTests, dispIntervals, nbPoints, algo, lendata, geometrie, nomHisto, nomAlgo):
+	pass
+
 # obaTest(500, 20, 128, True, True)
 histogramBha4bits(100, 5, 500)
 # bhaTest4bits(500, 20, True, True, "bha0")
