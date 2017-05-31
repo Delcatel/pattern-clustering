@@ -141,9 +141,9 @@ def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha")
 	R2, theta2, square = correction4bits(centroides)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
 
-	verbosity(verbose, error, 10, R, theta, R2, theta2)
+	verbosity(verbose, error, 5, R, theta, R2, theta2)
 
-	if display==True or (display=="auto" and error >= 10):
+	if display==True or (display=="auto" and error >= 5):
 		graphics(set, "blue")
 		graphics(centroides, "red")
 		graphics(square, "yellow", 0.5)
@@ -155,6 +155,32 @@ def bhaTest4bits(nbPoints, eps, verbose="auto", display="auto", imageName="bha")
 
 	return error
 
+def histogramBha4bits(nbTests, dispIntervals, clusteringThreshold=0.1):
+	Data = []
+	for i in range(1, nbTests+1):
+		if(i%dispIntervals==0):
+			print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
+		Data.append(bhaTest4bits(100, 0.3, "auto", False, "bha"+str(i)))
+
+	eff, val, patches = plt.hist(Data, range = (0, 10), bins = 50, edgecolor = 'black', normed=True)
+	plt.xlabel("Erreur sur H (en %)")
+	plt.ylabel("Proportion d'occurrence sur "+str(nbTests)+" tests")
+	plt.title("Overlapping Deviation Algorithm")
+
+	mu = mean(Data)
+	sigma = std(Data)
+	print("mu = "+str(mu))
+	print("std = "+str(sigma))
+	l = max(eff)
+	plt.plot([mu, mu], [0, l], color="red", ls="--")
+	plt.plot([mu-sigma, mu-sigma], [0, l*3/4], color="green", ls=":")
+	plt.plot([mu+sigma, mu+sigma], [0, l*3/4], color="green", ls=":")
+	plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, l), color="red")
+	plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=(mu+sigma, l*3/4), xytext=(mu+sigma+0.2, l*3/4), color="green")
+
+	plt.savefig("images/histogramOda"+str(nbTests)+"_"+str(clusteringThreshold)+".png")
+	plt.show()
+
 # obaTest(500, 0.5, 128, True, True)
-# histogramOda(1000, 50)
-bhaTest4bits(500, 0.3, True, True, "bha0")
+#histogramBha4bits(20, 1)
+bhaTest4bits(500, 0.5, True, True, "bha0")

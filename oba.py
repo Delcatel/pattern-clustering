@@ -80,22 +80,25 @@ def correction2bits(centroides):
 
 def correction4bits(centroides):
 	points = sorted([polar(c) for c in centroides], key=itemgetter(0))
-	print(points)
 	R1 = mean([pt[0] for pt in points[0:4]])
 	R2 = mean([pt[0] for pt in points[4:12]])
 	R3 = mean([pt[0] for pt in points[12:16]])
 	R = (R1+2*R2+R3)/(sqrt(2)+2*sqrt(10)+3*sqrt(2))
 	z0 = max(points, key=itemgetter(0))
-	print(z0)
-	rotatedPoints = [(r, thet-z0[1]+pi/4) for r, thet in points]
+	rotatedPoints = [(r, (thet-z0[1]+pi/4+pi)%(2*pi)-pi) for r, thet in points]
+	#graphics([rect(r, t) for r, t in rotatedPoints])
 	Z1 = sorted(rotatedPoints[0:4], key=itemgetter(1))
 	Z2 = sorted(rotatedPoints[4:12], key=itemgetter(1))
 	Z3 = sorted(rotatedPoints[12:16], key=itemgetter(1))
-	deltaTheta = sqrt(2)*sum([z1[1]-pi/2*k+3*pi/4 for k, z1 in enumerate(Z1)])+sqrt(10)*sum([z2[1]-pi/2*k+pi-atan(1/3) for k, z2 in enumerate(Z2[0:2:])])+sqrt(10)*sum([z2[1]-pi/2*k+pi/2+atan(1/3) for k, z2 in enumerate(Z2[1:2:])])+3*sqrt(2)*sum([z3[1]-pi/2*k+3*pi/4 for k, z3 in enumerate(Z3)])
-	deltaTheta = deltaTheta/16
-	print(deltaTheta)
+	deltaTheta = sqrt(2)*sum([z1[1]-pi/2*k+3*pi/4 for k, z1 in enumerate(Z1)])+sqrt(10)*sum([z2[1]-pi/2*k+pi-atan(1/3) for k, z2 in enumerate(Z2[0::2])])+sqrt(10)*sum([z2[1]-pi/2*k+pi/2+atan(1/3) for k, z2 in enumerate(Z2[1::2])])+3*sqrt(2)*sum([z3[1]-pi/2*k+3*pi/4 for k, z3 in enumerate(Z3)])
+	deltaTheta = deltaTheta/(4*sqrt(2)+8*sqrt(10)+4*3*sqrt(2))
+	#print([z1[1]-pi/2*k+3*pi/4 for k, z1 in enumerate(Z1)])
+	#print([z2[1]-pi/2*k+pi-atan(1/3) for k, z2 in enumerate(Z2[0::2])])
+	#print([z2[1]-pi/2*k+pi/2+atan(1/3) for k, z2 in enumerate(Z2[1::2])])
+	#print([z3[1]-pi/2*k+3*pi/4 for k, z3 in enumerate(Z3)])
+	#print(deltaTheta)
 	theta = z0[1]-pi/4+deltaTheta
-	print(theta)
+	#print(theta)
 
 	square = rect(R, theta)*array([-3+3j, -1+3j, 1+3j, 3+3j, -3+1j, -1+1j, 1+1j, 3+1j, -3-1j, -1-1j, 1-1j, 3-1j, -3-3j, -1-3j, 1-3j, 3-3j])
 
