@@ -6,6 +6,7 @@ from random import random
 # https://docs.scipy.org/doc/scipy/reference/cluster.html
 from oba import *
 from GenereCarre import GenerationCarre, GenerationCarre2, Generation4bits, Generation4bits2
+from transmission_bits import *
 
 def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):	# O(1)
 	if verbose==True or (verbose=="auto" and error >= 5):
@@ -15,7 +16,7 @@ def verbosity(verbose, error, err_threshold, R, theta, R2, theta2):	# O(1)
 		print('R = '+str(R2)+'; theta = '+str(theta2))
 		print('Erreur sur H : '+str(round(error, 1))+' %\n')
 
-def obaTest(nbPoints, snr, precision=32, verbose="auto", display="auto", clusteringThreshold=0.1):	# O(nbPoints)
+def obaTest(nbPoints, snr, precision=32, verbose=False, display=False, clusteringThreshold=0.1):	# O(nbPoints)
 	(R, theta, set) = GenerationCarre2(nbPoints,snr)	# O(nbPoints)
 	clusters, centroides, phi, deviationAngle = oba(set, precision, 1, clusteringThreshold)	# O(nbPoints + precision^2)
 	R2, theta2, square = correction2bits(centroides)	# O(1)
@@ -69,7 +70,7 @@ def histogramOba(nbTests, dispIntervals, clusteringThreshold=0.1):
 	# plt.show()
 	return mu, sigma
 
-def odaTest(nbPoints, snr, precision=64, verbose="auto", display="auto", clusteringThreshold=0.1):
+def odaTest(nbPoints, snr, precision=64, verbose=False, display=False, clusteringThreshold=0.1):
 	(R, theta, set) = GenerationCarre2(nbPoints, snr)
 	R2, theta2, square, deviationAngle = oda(set, precision, 1, clusteringThreshold)
 	error = min([100*abs(rect(R2, theta2+pi/2*k)-rect(R, theta))/R for k in range(4)])
@@ -119,7 +120,7 @@ def histogramOda(nbTests, dispIntervals, clusteringThreshold=0.1):
 
 	return mu, sigma
 
-def bhaTest2bits(nbPoints, snr, verbose="auto", display="auto", imageName="bha2bits"):	# O(nbPoints^3 ln(nbPoints))
+def bhaTest2bits(nbPoints, snr, verbose=False, display=False, imageName="bha2bits"):	# O(nbPoints^3 ln(nbPoints))
 	(R, theta, set) = GenerationCarre2(nbPoints,snr)	# O(nbPoints)
 	graphics(set, "blue")
 
@@ -141,7 +142,7 @@ def bhaTest2bits(nbPoints, snr, verbose="auto", display="auto", imageName="bha2b
 
 	return error
 
-def bhaTest4bits(nbPoints, snr, verbose="auto", display="auto", imageName="bha4bits"):	# O(nbPoints^3 ln(nbPoints))
+def bhaTest4bits(nbPoints, snr, verbose=False, display=False, imageName="bha4bits"):	# O(nbPoints^3 ln(nbPoints))
 	(R, theta, set) = Generation4bits2(nbPoints,snr)	# O(nbPoints)
 
 	centroides = bha(set, 16)	# O(nbPoints^3 ln(nbPoints))
@@ -197,18 +198,32 @@ def Test(nbTests, dispIntervals, nbPoints, algo, lendata, geometrie, nomHisto, n
 # odaTest(500, 10, 128, True, True)
 # bhaTest2bits(500, 10, 128, True)
 # bhaTest4bits(500, 20, 128, True)
-
-def tripleHistoH(nbTests, nbPoints listSnr, nomAlgo, intervalHist=(0, 5)):
+def tripleHistoHvariantSnr(nbTests, nbPoints, listSnr, algo, nomAlgo, intervalHist=(0, 5)):
 	n = len(listSnr)
 
-	for k in listSnr
+	for k in range(n):
 		plt.subplot(n,1,k+1)
-		histogram_erreur_relative(1000,50,viterbi_test,1000,listSnr[k], nomAlgo,intervalAlgo)
+		histogram_erreur_relative(nbTests, nbTests/20,algo,nbPoints,listSnr[k], nomAlgo,intervalHist)
 
-	plt.title("Viterbi algorithm")
+	plt.title(nomAlgo+" algorithm")
 	plt.ylabel("Densité d'occurrence sur {} tests de {} points".format(nbTests, nbPoints))
 	plt.xlabel("Erreur sur H (%)")
 
-	savefig("images/tripleHisto_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
+	plt.savefig("images/tripleHistoH_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
 	plt.show()
 
+def tripleHistobinvariantSnr(nbTests, nbPoints, listSnr, algo, nomAlgo, intervalHist=(0, 5)):
+	n = len(listSnr)
+
+	for k in range(n):
+		plt.subplot(n,1,k+1)
+		histogram_erreur_binaire(nbTests,nbTests/20,algo,transmission,nbPoints,listSnr[k], nomAlgo,intervalHist)
+
+	plt.title(nomAlgo+" algorithm")
+	plt.ylabel("Densité d'occurrence sur {} tests de {} points".format(nbTests, nbPoints))
+	plt.xlabel("Erreur sur H (%)")
+
+	plt.savefig("images/tripleHistobin_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
+	plt.show()
+
+tripleHistoHvariantSnr(1000, 500, [5, 10, 30], obaTest, "Barycenter Overlapping", (0, 5))
