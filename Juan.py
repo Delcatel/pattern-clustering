@@ -101,5 +101,9 @@ def Estime_h(snr,N):
         return [h,iterations] # h_new correspond à 1/H
 
     h_0 = random.random()*np.exp(1j*2*np.pi*random.random())
-    h = descente_grad(H,Data,h_0,epsilon,0.01)[0]
-    return 100*np.linalg.norm(h-H)/np.linalg.norm(H)
+    if h < 10:
+        h = descente_grad(H,Data,h_0,epsilon,0.01)[0]
+        return 100*np.linalg.norm(h-H)/np.linalg.norm(H)
+    elif:
+        return None
+   
