@@ -17,8 +17,11 @@ def muOda():	# N=500, 1000 tests, eps = 0.5 -> snr = 5
 	plot(thresholdOda, muOda-sigmaOda, color="green")
 	xlim(0, 0.7)
 	ylim(0, 7)
-	ylabel("Erreur relative sur H")
-	xlabel("seuil de clusterisation (en %)")
+	ylabel("Erreur relative sur H (en %)")
+	xlabel("seuil de clusterisation")
+	text(0.3, 4, r'$\mu$', color="red")
+	text(0.3, 5.2, r'$\mu+\sigma$', color ="green")
+	text(0.3, 2.2, r'$\mu-\sigma$', color ="green")
 	savefig("images/errorOfThresholdOda.png")
 	show()
 
