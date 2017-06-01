@@ -6,7 +6,7 @@ from numpy import complex as cp
 
 N = 100
 Centroides = [1+1j,1-1j,-1+1j,-1-1j]
-epsilon = 1.e-1  
+epsilon = 5.e-1  
 nb_centres = 4
 SNR = 10
         
@@ -102,4 +102,4 @@ def Estime_h(snr,N):
 
     h_0 = random.random()*np.exp(1j*2*np.pi*random.random())
     h = descente_grad(H,Data,h_0,epsilon,0.01)[0]
-    return h
+    return 100*np.linalg.norm(h-H)/np.linalg.norm(H)

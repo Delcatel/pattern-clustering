@@ -7,7 +7,25 @@ from numpy import argmax, argmin, mean, std
 
 
 
-
+def H(nbpoints,nbtests,algo,nom_algo):
+    #on veut des graphes de H en fct du snr. algo doit renvoyer l'erreur sur H.
+    L = [5,10,20,30,50]
+    H = []
+    for snr in L:
+        erreur = 0
+        for k in range(nbtests):
+            if (k+1)%50==0:
+                print("Test " + str(k+1) + " sur " + str(nbtests))
+            erreur+=algo(nbpoints,snr)
+        H.append(erreur/nbtests)
+    plt.plot(L,H)
+    #plt.show()
+    plt.xlabel("SNR")
+    plt.axis([0,50,0,4])
+    plt.ylabel("Erreur relative sur H")
+    #plt.title(nom_algo + "Algorithm")
+    
+        
 
 
 

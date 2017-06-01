@@ -183,4 +183,4 @@ def histogramBha4bits(nbTests, dispIntervals, clusteringThreshold=0.1):
 
 # obaTest(500, 0.5, 128, True, True)
 #histogramBha4bits(20, 1)
-bhaTest4bits(500, 0.5, True, True, "bha0")
+#bhaTest4bits(500, 0.5, True, True, "bha0")
