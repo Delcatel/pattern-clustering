@@ -16,7 +16,7 @@ def rectToComplex(set):	# O(len(set))
 def ComplexToRect(set): # O(len(set))
 	return [(z.real, z.imag) for z in set]
 
-def oba(set, nb4Sect=32, surfSect=1, threshold=0.6827):	# O(len(set) + nb4Sect^2)
+def oba(set, nb4Sect=64, surfSect=1, threshold=0.1):	# O(len(set) + nb4Sect^2)
 	sectDeg = pi/(2*nb4Sect)
 	value = 0
 	surfSect-=1
@@ -42,7 +42,12 @@ def oba(set, nb4Sect=32, surfSect=1, threshold=0.6827):	# O(len(set) + nb4Sect^2
     
 	return clusters, centroides, phi, deviationAngle
 
-def oda (set, nb4Sect=64, surfSect=1, threshold=0.6827):	# O(len(set))
+def obaBin(set, nb4Sect=64, surfSect=1, threshold=0.1):
+	clusters, centroides, phi, deviationAngle = oba(set, nb4Sect, surfSect, threshold)
+	R2, theta2, square = correction2bits(centroides)
+	return rect(R2, theta2)
+
+def oda(set, nb4Sect=64, surfSect=1, threshold=0.1):	# O(len(set))
 	""" Algo not based on barycentres but standard deviation """
 	sectDeg = pi/(2*nb4Sect)
 	value = 0
@@ -64,6 +69,11 @@ def oda (set, nb4Sect=64, surfSect=1, threshold=0.6827):	# O(len(set))
 	square = [rect(R, theta+pi/2*k) for k in range(4)]
     
 	return R/sqrt(2), (theta-pi/4)%(pi/2), square, deviationAngle
+
+def odaBin(set, nb4Sect=64, surfSect=1, threshold=0.1):
+	R, theta, square, deviationAngle = oda(set, nb4Sect, surfSect, threshold)
+
+	return rect(R, theta)
 
 def correction2bits(centroides):	# O(len(centroides))
 	R = mean([abs(c) for c in centroides])
@@ -141,3 +151,13 @@ def bha(set, nbClusters):	# O(len(set)^3 ln(len(set)))
 		# print([pt.index for pt in points])
 
 	return [pt.z for pt in points]
+
+def bhaBin2bits(set):
+	centroides = bha(set, 4)
+	R2, theta2, square = correction2bits(centroides)
+	return rect(R2, theta2)
+
+def bhaBin4bits(set):
+	centroides = bha(set, 4)
+	R2, theta2, square = correction4bits(centroides)
+	return rect(R2, theta2)

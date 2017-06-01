@@ -39,7 +39,7 @@ def transmission(L_bits,snr,algo):
     Pb = bruit.dot(np.conj(bruit))/N
     alpha = np.sqrt(Ps/Pb/snr)
     data = H*data + alpha*bruit
-    H_estime = algo(data,H)
+    H_estime = algo(data)
     #print("erreur relative sur H en % = " + str(np.absolute((H-H_estime)/H)*100))
     data = data/H_estime
     L_bis = [0]*2*N
@@ -61,6 +61,39 @@ def transmission(L_bits,snr,algo):
             else:
                 L_bis[2*i] = 0
                 L_bis[2*i+1] = 1
+    N = len(L_bits)
+    erreurs = 0
+    for k in range(N):
+        if L_bits[k]!=L_bis[k]:
+            erreurs+=1
+    return erreurs/N*100
+
+def transmission4bits(L_bits,snr,algo):
+    N = int(len(L_bits)//4)
+    #on convertit en complexes
+    s = [-3+3j, -1+3j, 1+3j, 3+3j, -3+1j, -1+1j, 1+1j, 3+1j, -3-1j, -1-1j, 1-1j, 3-1j, -3-3j, -1-3j, 1-3j, 3-3j]
+    bits = ["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"]
+    R = random()
+    theta = np.pi*random()/2.
+    H = R*np.exp(complex(0,theta))
+    data = np.array([complex(0,0) for i in range(N)])
+    bruit = np.array([complex(0,0) for i in range(N)])
+    for i in range(N):
+        data[i] = s[bits.index(L_bits[str(4*i)]+L_bits[str(4*i)+1]+L_bits[str(4*i)+2]+L_bits[str(4*i+3)])]
+        bruit[i]= np.random.normal(0,1) + complex(0,1)*np.random.normal(0,1)
+    #ajustement du snr
+    Ps = np.absolute(H)**2*(data.dot(np.conj(data))/N)
+    Pb = bruit.dot(np.conj(bruit))/N
+    alpha = np.sqrt(Ps/Pb/snr)
+    data = H*data + alpha*bruit
+    H_estime = algo(data[0:4*N])
+    #print("erreur relative sur H en % = " + str(np.absolute((H-H_estime)/H)*100))
+    data = data/H_estime
+    L_bis = [0]*(4*N)
+    # on reconvertit en binaire
+    for i in range(N):
+        L_bis[4*i:4*i+3] =bits[np.argmin(np.array([abs(s[k]-data[i]) for k in range(16)]))]
+
     N = len(L_bits)
     erreurs = 0
     for k in range(N):
