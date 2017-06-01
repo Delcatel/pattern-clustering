@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from cmath import phase
+import math
+from random import random
+from numpy import argmax, argmin, mean, std
 from GenereCarre import *
 
 #L'idee : a chaque iteration de K-means on retient les barycentres les plus eloignes, ce qui definit
@@ -78,7 +81,7 @@ def K_means(nbclusters,data,epsilon):
             if len(clusters[i])==0:
                 barycentres[i]=np.copy(centroides[i])
             else:
-                barycentres[i] = barycentre_cluster(clusters[i])
+                barycentres[i] = np.copy(barycentre_cluster(clusters[i]))
         centroides_old = np.copy(centroides)
         centroides = np.copy(barycentres)
         clusters = clusterization(data,centroides)
@@ -199,7 +202,7 @@ def K_means_diag_carre_4bits(data,epsilon):
     barycentres = [[0,0]]*n0              
     clusters = clusterization(data,centroides)
     compteur=0
-    while (compteur<100 and ecart_centroides(centroides,centroides_old) > epsilon):
+    while (compteur<30 and ecart_centroides(centroides,centroides_old) > epsilon):
         compteur+=1
         for i in range(n0):
             if len(clusters[i])==0:
@@ -209,7 +212,7 @@ def K_means_diag_carre_4bits(data,epsilon):
         centroides_old = np.copy(centroides)
         (max,imax,jmax)=((barycentres[0][0]-barycentres[1][0])**2+(barycentres[0][1]-barycentres[1][1])**2,0,1)
         for i in range(n0):
-            for j in range(n0):
+            for j in range(i+1,n0):
                 a=(barycentres[i][0]-barycentres[j][0])**2+(barycentres[i][1]-barycentres[j][1])**2
                 if (a>max):
                     max=a
@@ -298,8 +301,7 @@ def Resolution_K_means(n0,data):
 ###################################################################################################################################	
 
 #Pour visualiser le resultat de k_means ou de k_means_diag_carre_2bits en fonction de la ligne decommentee
-def test1_2bits(SNR):
-	N=500
+def test1_2bits(N,SNR):
 	(R,theta,mi)=GenerationCarre2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	#[clusters,centroides] = K_means_diag_carre_2bits(data,0.00001)
@@ -312,8 +314,7 @@ def test1_2bits(SNR):
 		plt.scatter(centroides[k][0],centroides[k][1],color='k')
 	plt.show()
 
-def test1_4bits(SNR):
-	N=500
+def test1_4bits(N,SNR):
 	(R,theta,mi)=Generation4bits2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	[clusters,centroides] = K_means_diag_carre_4bits(data,0.00001)
@@ -354,7 +355,7 @@ def erreur_K_means_2bits(N,SNR):
 	
 def erreur_K_means_4bits(N,SNR):
 	n0=16
-	(R,theta,mi)=GenerationCarre2(N,SNR)
+	(R,theta,mi)=Generation4bits2(N,SNR)
 	data=[[x.real,x.imag] for x in mi]
 	(Rapp,thetaapp)=Resolution_K_means(n0,data)
 	H=R*np.exp(np.complex(0,theta))
@@ -395,5 +396,41 @@ def erreur_moy_et_nb_erreurs(fonction_erreur,N,SNR):
 	
 fonctions_erreurs_2bits=[erreur_K_means_2bits,erreur_K_means_diag_carre_2bits]
 fonctions_erreurs_4bits=[erreur_K_means_4bits,erreur_K_means_diag_carre_4bits]
-valeurs_SNR=[10,20,30,40,50,60]
-valeurs_N=[50,100,500,1000]
+
+def histogram_erreur_relative(nbTests, dispIntervals,algo_test,nbpoints,snr,nom_algo,absc):
+      #l'algo_test doit renvoyer une erreur relative en %.. L'algo ne prend en parametre que le nb de points et le snr
+      #nom_algo est un string
+      #absc est de type (0, 3) et definit les abscicsses
+      Data = []
+      for i in range(1, nbTests+1):
+           if(i%dispIntervals==0):
+                print("Test numéro "+str(i)+" sur "+str(nbTests)+"\n")
+           Data.append(algo_test(nbpoints,snr))
+    
+      eff, val, patches = plt.hist(Data, range = absc, bins = 25, edgecolor = 'black', normed=True)
+      #plt.xlabel("Erreur sur H (%)")
+      #plt.ylabel("Densité d'occurrence sur "+str(nbTests)+" tests")
+      #plt.title(nom_algo + " Algorithm")
+    
+      mu = mean(Data)
+      sigma = std(Data)
+      print("mu = "+str(mu))
+      print("std = "+str(sigma))
+      l = max(eff)
+      plt.plot([mu, mu], [0, l], color="red", ls="--",label = 'SNR = ' + str(snr) + ', N = ' + str(nbpoints))
+      plt.legend(loc=1,prop={'size':8})
+      plt.plot([max(0.0001,mu-sigma), max(0.0001,mu-sigma)], [0, l*3/4], color="green", ls=":")
+      plt.plot([mu+sigma, mu+sigma], [0, l*3/4], color="green", ls=":")
+      plt.annotate(r'$\mu$ = '+str(round(mu, 2))+'%', xy=(mu, l), xytext=(mu+0.2, 4*l/5), color="red")
+      plt.annotate(r'$\sigma$ = '+str(round(sigma, 2))+'%', xy=((mu+sigma), l*3/4), xytext=(mu+4*sigma/5+0.2, l*3/5), color="green")
+		
+plt.subplot(3,1,1)
+histogram_erreur_relative(200,25,erreur_K_means_2bits,1000,5,"mon algo",(0, 5))
+plt.title("K-means contraint QAM 16")
+plt.subplot(3,1,2)
+histogram_erreur_relative(200,25,erreur_K_means_2bits,1000,10,"mon algo",(0, 5))
+plt.ylabel("Densite d'occurrence sur 200 tests")
+plt.subplot(3,1,3)
+histogram_erreur_relative(200,25,erreur_K_means_2bits,1000,30,"mon algo",(0, 5))
+plt.xlabel("Pourcentage d'erreur sur H ")
+plt.show()
