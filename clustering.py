@@ -198,32 +198,43 @@ def Test(nbTests, dispIntervals, nbPoints, algo, lendata, geometrie, nomHisto, n
 # odaTest(500, 10, 128, True, True)
 # bhaTest2bits(500, 10, 128, True)
 # bhaTest4bits(500, 20, 128, True)
+
 def tripleHistoHvariantSnr(nbTests, nbPoints, listSnr, algo, nomAlgo, intervalHist=(0, 5)):
-	n = len(listSnr)
+	n = len(listSnr) # = 3
 
-	for k in range(n):
-		plt.subplot(n,1,k+1)
-		histogram_erreur_relative(nbTests, nbTests/20,algo,nbPoints,listSnr[k], nomAlgo,intervalHist)
-
+	plt.subplot(n,1,1)
+	histogram_erreur_relative(nbTests,nbTests/20,algo,nbPoints,listSnr[0], nomAlgo,intervalHist)
 	plt.title(nomAlgo+" algorithm")
+
+	plt.subplot(n,1,2)
+	histogram_erreur_relative(nbTests,nbTests/20,algo,nbPoints,listSnr[1], nomAlgo,intervalHist)
 	plt.ylabel("Densité d'occurrence sur {} tests de {} points".format(nbTests, nbPoints))
+
+	plt.subplot(n,1,3)
+	histogram_erreur_relative(nbTests,nbTests/20,algo,nbPoints,listSnr[2], nomAlgo,intervalHist)
 	plt.xlabel("Erreur sur H (%)")
 
 	plt.savefig("images/tripleHistoH_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
 	plt.show()
 
 def tripleHistobinvariantSnr(nbTests, nbPoints, listSnr, algo, nomAlgo, intervalHist=(0, 5)):
-	n = len(listSnr)
+	n = len(listSnr) # = 3
 
-	for k in range(n):
-		plt.subplot(n,1,k+1)
-		histogram_erreur_binaire(nbTests,nbTests/20,algo,transmission,nbPoints,listSnr[k], nomAlgo,intervalHist)
-
+	plt.subplot(n,1,1)
+	histogram_erreur_binaire(nbTests,nbTests/20,algo,transmission,nbPoints,listSnr[0], nomAlgo,intervalHist)
 	plt.title(nomAlgo+" algorithm")
+
+	plt.subplot(n,1,2)
+	histogram_erreur_binaire(nbTests,nbTests/20,algo,transmission,nbPoints,listSnr[1], nomAlgo,intervalHist)
 	plt.ylabel("Densité d'occurrence sur {} tests de {} points".format(nbTests, nbPoints))
+
+	plt.subplot(n,1,3)
+	histogram_erreur_binaire(nbTests,nbTests/20,algo,transmission,nbPoints,listSnr[2], nomAlgo,intervalHist)
 	plt.xlabel("Erreur sur H (%)")
 
 	plt.savefig("images/tripleHistobin_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
 	plt.show()
 
-tripleHistoHvariantSnr(1000, 500, [5, 10, 30], obaTest, "Barycenter Overlapping", (0, 5))
+# tripleHistoHvariantSnr(1000, 500, [10, 30, 50], odaTest, "Overlapping Deviation", (0, 10))
+# tripleHistoHvariantSnr(1000, 500, [10, 30, 50], obaTest, "Overlapping Barycenter", (0, 5))
+# tripleHistoHvariantSnr(100, 500, [10, 30, 50], bhaTest2bits, "2 bits Black Hole", (0, 5))
