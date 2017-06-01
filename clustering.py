@@ -211,3 +211,4 @@ def tripleHistoH(nbTests, nbPoints listSnr, nomAlgo, intervalHist=(0, 5)):
 
 	savefig("images/tripleHisto_{}_{}_{}.png".format(nomAlgo, nbTests, nbPoints))
 	plt.show()
+

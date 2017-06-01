@@ -33,10 +33,7 @@ def viterbi_test(nbpoints,snr):
 
 
         
-def main():
-    N=10000
-    snr = 30
-    histogram_erreur_relative(1000,50,viterbi_test,N,snr,"Viterbi",(0, 5))
+
 
 
 """plt.subplot(3,1,1)
